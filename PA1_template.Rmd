@@ -172,7 +172,6 @@ hist(totalSteps2$steps,
 ```{r echo = TRUE}
 
 summary(data)
-
 summary(data2)
 
 ```
@@ -181,3 +180,55 @@ summary(data2)
 
 
 ## Are there differences in activity patterns between weekdays and weekends?
+
+1.Create a new factor variable in the dataset with two levels - "weekday" and "weekend" indicating whether a given date is a weekday or weekend day.
+
+```{r echo = TRUE}
+
+#Create a boolean to identify weekens
+
+weekendFlag <- chron::is.weekend(data2$date)
+
+#Add the new Column
+data2$weekend.identifier <- chron::is.weekend(data2$date)
+
+#Assign Factor Values
+
+data2$weekend.identifier[which(data2$weekend.identifier)] <- "Weekend"
+data2$weekend.identifier[which(data2$weekend.identifier == FALSE )] <- "Weekday"
+
+head(data2)
+
+```
+
+## 2.Panel plot of the 5-minute interval (x-axis) and the average number of steps taken, averaged across all weekday days or weekend days (y-axis). 
+
+
+
+```{r fig.align='center', echo = TRUE}
+par(mfrow = c(2,1))
+
+#Calculate mean for Weekdays
+averageSteps <- aggregate(steps ~ interval + steps, 
+                          data2[which(data2$weekend.identifier == "Weekday"),], 
+                          FUN=mean)
+
+#Graph it
+plot(averageSteps, type = "l", 
+     main="Average Steps Weekdays",
+     xlab="Interval", col="green",  ylab = "Average Number of Steps",
+     ylim = c(0,250))
+
+
+#Calculate mean for Weekend
+averageSteps <- aggregate(steps ~ interval + steps, 
+                          data2[which(data2$weekend.identifier == "Weekend"),], 
+                          FUN=mean)
+
+#Graph it
+plot(averageSteps, type = "l", 
+     main="Average Steps Weekend",
+     xlab="Interval", col="blue",  ylab = "Average Number of Steps", 
+     ylim = c(0,250))
+
+```

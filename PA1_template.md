@@ -173,11 +173,10 @@ hist(totalSteps2$steps,
 
 ###What is the impact of imputing missing data on the estimates of the total daily number of steps?
 
-Mean is bigger.
 
 
 ```r
-summary(data, na.rm = TRUE)
+summary(data)
 ```
 
 ```
@@ -192,7 +191,7 @@ summary(data, na.rm = TRUE)
 ```
 
 ```r
-summary(data2, , na.rm = TRUE)
+summary(data2)
 ```
 
 ```
@@ -205,5 +204,70 @@ summary(data2, , na.rm = TRUE)
 ##  Max.   :806.00   Max.   :2012-11-30   Max.   :2355.0
 ```
 
+3rd Quantile grew for NA substituted values
+
 
 ## Are there differences in activity patterns between weekdays and weekends?
+
+1.Create a new factor variable in the dataset with two levels - "weekday" and "weekend" indicating whether a given date is a weekday or weekend day.
+
+
+```r
+#Create a boolean to identify weekens
+
+weekendFlag <- chron::is.weekend(data2$date)
+
+#Add the new Column
+data2$weekend.identifier <- chron::is.weekend(data2$date)
+
+#Assign Factor Values
+
+data2$weekend.identifier[which(data2$weekend.identifier)] <- "Weekend"
+data2$weekend.identifier[which(data2$weekend.identifier == FALSE )] <- "Weekday"
+
+head(data2)
+```
+
+```
+##       steps       date interval weekend.identifier
+## 1 1.7169811 2012-10-01        0            Weekday
+## 2 0.3396226 2012-10-01        5            Weekday
+## 3 0.1320755 2012-10-01       10            Weekday
+## 4 0.1509434 2012-10-01       15            Weekday
+## 5 0.0754717 2012-10-01       20            Weekday
+## 6 2.0943396 2012-10-01       25            Weekday
+```
+
+## 2.Panel plot of the 5-minute interval (x-axis) and the average number of steps taken, averaged across all weekday days or weekend days (y-axis). 
+
+
+
+
+```r
+par(mfrow = c(2,1))
+
+#Calculate mean for Weekdays
+averageSteps <- aggregate(steps ~ interval + steps, 
+                          data2[which(data2$weekend.identifier == "Weekday"),], 
+                          FUN=mean)
+
+#Graph it
+plot(averageSteps, type = "l", 
+     main="Average Steps Weekdays",
+     xlab="Interval", col="green",  ylab = "Average Number of Steps",
+     ylim = c(0,250))
+
+
+#Calculate mean for Weekend
+averageSteps <- aggregate(steps ~ interval + steps, 
+                          data2[which(data2$weekend.identifier == "Weekend"),], 
+                          FUN=mean)
+
+#Graph it
+plot(averageSteps, type = "l", 
+     main="Average Steps Weekend",
+     xlab="Interval", col="blue",  ylab = "Average Number of Steps", 
+     ylim = c(0,250))
+```
+
+<img src="PA1_template_files/figure-html/unnamed-chunk-16-1.png" style="display: block; margin: auto;" />
